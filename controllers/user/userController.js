@@ -1,3 +1,12 @@
+const signUp = async(req,res)=>{
+    try {
+        await res.render('signup')
+    } catch (error) {
+        console.log('signup page not loading',error.message)
+        res.status(500).send('server Error')
+    }
+}
+
 const loadHome = async(req,res)=>{
     try {
         return res.render('home')
@@ -16,5 +25,5 @@ const pageNotFound = async(req,res)=>{
 }
 
 module.exports = {
-    loadHome,pageNotFound
+    loadHome,pageNotFound,signUp
 }

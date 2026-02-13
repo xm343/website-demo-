@@ -1,0 +1,97 @@
+:root {
+  --main-color: #ededed;
+  --text-color: #333;
+  --accent-color: #ff6b6b;
+}
+
+body {
+  background: var(--main-color);
+  font-family: 'Nunito Sans', sans-serif;
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.container-404 {
+  text-align: center;
+  position: relative;
+}
+
+h1 {
+  font-size: 8rem;
+  margin: 0;
+  color: var(--text-color);
+  text-shadow: 2px 2px 0px #fff;
+}
+
+h3 {
+  font-size: 2rem;
+  margin: 10px 0 20px;
+}
+
+p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+}
+
+.home-btn {
+  display: inline-block;
+  padding: 12px 30px;
+  background: var(--accent-color);
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  border-radius: 30px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.home-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  color: white;
+}
+
+/* Ghost Animation */
+.ghost {
+  animation: float 3s ease-out infinite;
+  display: inline-block;
+}
+
+.ghost-svg {
+  width: 150px;
+  height: auto;
+}
+
+.ghost-eyes {
+  animation: blink 4s infinite;
+  transform-origin: center;
+}
+
+.ghost-shadow {
+  width: 100px;
+  height: 20px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 50%;
+  margin: 20px auto 0;
+  animation: shrink 3s ease-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes shrink {
+  0%, 100% { transform: scale(1); opacity: 0.1; }
+  50% { transform: scale(0.8); opacity: 0.05; }
+}
+
+@keyframes blink {
+  0%, 96%, 98% { transform: scaleY(1); }
+  97% { transform: scaleY(0.1); }
+}
