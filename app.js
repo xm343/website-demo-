@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const path = require('path')
 const env = require('dotenv').config()
+const session = require('express-session')
 const connectDB = require('./config/db')
 const userRoute = require('./routes/userRoute')
 connectDB()
@@ -10,6 +11,16 @@ connectDB()
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(session({
+    secret: process.env.SESSION_SECRET, // Add this line
+    resave:false,
+    saveUninitialized:true,
+    cookie:{
+        secure:false,
+        httpOnly:true,
+        maxAge:72*60*60*1000
+    }
+}))
 
 
 app.set('view engine', 'ejs')
