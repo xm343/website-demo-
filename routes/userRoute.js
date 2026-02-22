@@ -9,6 +9,8 @@ router.get('/',userController.loadHome)
 router.get('/pageNotFound',userController.pageNotFound)
 router.get('/signup',userController.signUp)
 router.post('/signup',userController.signup)
+router.post('/verify-otp',userController.verifyOtp)
+router.post('/resend-otp',userController.resendOtp)
 
 
 
