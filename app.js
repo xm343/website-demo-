@@ -5,6 +5,7 @@ const env = require('dotenv').config()
 const session = require('express-session')
 const connectDB = require('./config/db')
 const userRoute = require('./routes/userRoute')
+const passport = require('./config/passport')
 connectDB()
 
 
@@ -21,6 +22,9 @@ app.use(session({
         maxAge:72*60*60*1000
     }
 }))
+
+app.use(passport.initialize())
+app.use(passport.session())
 
 
 app.set('view engine', 'ejs')
