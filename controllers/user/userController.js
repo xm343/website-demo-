@@ -83,7 +83,14 @@ const signUp = async(req,res)=>{
 
 const loadHome = async(req,res)=>{
     try {
-        return res.render('home')
+        const userId = req.session.user || (req.user ? req.user._id : null)
+        if(userId){
+            const userData = await User.findById(userId)
+            return res.render('home',{user:userData})
+        }
+        else{
+            return res.render('home')
+        }
         
     } catch (error) {
         console.log('home page not found',error.message)
@@ -151,7 +158,57 @@ const resendOtp = async(req,res)=>{
         res.status(500).json({success:false,message:'Failed to Send OTP'})
     }
 }
+const loadLogin = async(req,res)=>{
+    try {
+        if(!req.session.user){
+            return res.render('login')
+        }
+        else{
+            return res.redirect('/')
+        }
+    } catch (error) {
+        res.redirect('/pageNotFound')
+    }
+}
+
+const login = async(req,res)=>{
+    try {
+        const {email,password} = req.body
+        const findUser = await User.findOne({isAdmin:false,email:email})
+        if(!findUser){
+            return res.render('login',{message:'user not found'})
+        } 
+        if(findUser.isBlocked){
+            return res.render('login',{message:'user is blocked by admin'})
+        }
+        const passwordMatch = await bcrypt.compare(password,findUser.password)
+        if(!passwordMatch){
+            return res.render("login",{message:'password incorrect'})
+        }
+        req.session.user = findUser._id
+        res.redirect('/')
+
+    } catch (error) {
+        console.log('login error',error)
+        res.render('login',{message:'logi error please try again later'})
+    }
+}
+
+const logout = async (req, res) => {
+    try {
+        req.session.destroy((err) => {
+            if (err) {
+                console.log('logout error', err.message)
+                return res.redirect('/pageNotFound')
+            }
+            res.redirect('/login')
+        })
+    } catch (error) {
+        console.log('logout error', error.message)
+        res.redirect('/pageNotFound')
+    }
+}
 
 module.exports = {
-    loadHome,pageNotFound,signUp,signup,verifyOtp,resendOtp
+    loadHome,pageNotFound,signUp,signup,verifyOtp,resendOtp,loadLogin,login,logout
 }

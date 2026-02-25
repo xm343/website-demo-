@@ -14,6 +14,7 @@ router.post('/verify-otp',userController.verifyOtp)
 router.post('/resend-otp',userController.resendOtp)
 
 
+
 router.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}))
 
 router.get('/auth/google/callback', 
@@ -22,8 +23,9 @@ router.get('/auth/google/callback',
         res.redirect('/')
     }
 )
-
-
+router.get('/login',userController.loadLogin)
+router.post('/login',userController.login)
+router.get('/logout',userController.logout)
 
 
 
