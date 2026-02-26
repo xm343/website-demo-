@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Error</title>
+    <link rel="stylesheet" href="/css/admin-error.css">
+</head>
+
+<body>
+
+<div class="error-container">
+
+    <div class="error-box">
+
+        <h1><%= statusCode || 500 %></h1>
+
+        <h2>Admin Panel Error</h2>
+
+        <p>
+            <%= message || "Something went wrong while processing your request." %>
+        </p>
+
+        <div class="btn-group">
+            <a href="/admin/dashboard" class="btn primary">
+                Go to Dashboard
+            </a>
+
+            <button onclick="location.reload()" class="btn secondary">
+                Retry
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

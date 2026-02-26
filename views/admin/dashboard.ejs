@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/adminDashboard.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h2>Ecommerce Admin</h2>
+
+        <ul>
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="/admin/products">Products</a></li>
+            <li><a href="/admin/orders">Orders</a></li>
+            <li><a href="/admin/users">Users</a></li>
+            <li><a href="/admin/category">Categories</a></li>
+            <li><a href="/admin/logout">Logout</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+
+        <h1>Dashboard Overview</h1>
+
+        <!-- Stats -->
+        <div class="cards">
+
+            <div class="card">
+                <h3>Total Users</h3>
+                <p><%= locals.totalUsers || 0 %></p>
+            </div>
+
+            <div class="card">
+                <h3>Total Products</h3>
+                <p><%= locals.totalProducts || 0 %></p>
+            </div>
+
+            <div class="card">
+                <h3>Total Orders</h3>
+                <p><%= locals.totalOrders || 0 %></p>
+            </div>
+
+            <div class="card revenue">
+                <h3>Total Revenue</h3>
+                <p>₹ <%= locals.totalRevenue || 0 %></p>
+            </div>
+
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="table-section">
+
+            <h2>Recent Orders</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>User</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <% if (locals.orders && orders.length > 0) { %>
+                        <% orders.forEach(order => { %>
+                            <tr>
+                                <td><%= order._id %></td>
+                                <td><%= order.user %></td>
+                                <td>₹ <%= order.total %></td>
+                                <td><%= order.status %></td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4" style="text-align: center;">No orders found</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>

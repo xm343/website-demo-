@@ -5,6 +5,7 @@ const env = require('dotenv').config()
 const session = require('express-session')
 const connectDB = require('./config/db')
 const userRoute = require('./routes/userRoute')
+const adminRoute = require('./routes/adminRoute')
 const passport = require('./config/passport')
 connectDB()
 
@@ -31,6 +32,7 @@ app.set('view engine', 'ejs')
 app.set('views', [path.join(__dirname, 'views/user'), path.join(__dirname, 'views/admin')])
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', userRoute)
+app.use('/admin',adminRoute)
 
 app.use((req, res, next) => {
     res.status(404).render('page-404');

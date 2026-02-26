@@ -1,0 +1,93 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial;
+}
+
+body{
+    background:#f1f5f9;
+}
+
+.container{
+    display:flex;
+}
+
+/* Sidebar */
+
+.sidebar{
+    width:230px;
+    height:100vh;
+    background:#111827;
+    color:white;
+    padding:20px;
+}
+
+.sidebar h2{
+    margin-bottom:30px;
+}
+
+.sidebar ul{
+    list-style:none;
+}
+
+.sidebar li{
+    margin:15px 0;
+}
+
+.sidebar a{
+    text-decoration:none;
+    color:white;
+}
+
+.sidebar a:hover{
+    color:#60a5fa;
+}
+
+/* Main */
+
+.main{
+    flex:1;
+    padding:30px;
+}
+
+/* Cards */
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    margin-top:20px;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.revenue{
+    background:#2563eb;
+    color:white;
+}
+
+/* Table */
+
+.table-section{
+    margin-top:40px;
+    background:white;
+    padding:20px;
+    border-radius:8px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+
+th, td{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+}
