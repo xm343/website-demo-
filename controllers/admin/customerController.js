@@ -73,9 +73,24 @@ const deleteCustomer = async (req, res) => {
     }
 };
 
+const customerDetails = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const customer = await User.findById(id);
+        if (!customer) {
+            return res.redirect("/admin/pageerror");
+        }
+        res.render("customer-details", { customer });
+    } catch (error) {
+        console.error("Error in customerDetails:", error);
+        res.redirect("/admin/pageerror");
+    }
+};
+
 module.exports = {
     customerInfo,
     blockCustomer,
     unblockCustomer,
     deleteCustomer,
+    customerDetails,
 };

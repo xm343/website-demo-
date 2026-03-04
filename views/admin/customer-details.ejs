@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Details | Admin</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- External CSS -->
+    <link rel="stylesheet" href="/css/admin-styles.css">
+    <style>
+        .details-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 2rem 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+        }
+        .detail-value {
+            color: #111;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 1rem;
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-layout">
+    <%- include('../partials/admin/sidebar') %>
+
+    <main class="main-content">
+        <div class="container">
+            <a href="/admin/customers" class="back-btn">&larr; Back to Customers</a>
+            <h2>Customer Profile</h2>
+
+            <div class="details-card">
+                <div class="detail-row">
+                    <span class="detail-label">Full Name</span>
+                    <span class="detail-value"><%= customer.name %></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Email Address</span>
+                    <span class="detail-value"><%= customer.email %></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Phone</span>
+                    <span class="detail-value"><%= customer.phone || 'Not Provided' %></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Account Status</span>
+                    <span class="detail-value">
+                        <% if(customer.isBlocked){ %>
+                            <span class="status-blocked">Blocked</span>
+                        <% } else { %>
+                            <span class="status-active">Active</span>
+                        <% } %>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Joined On</span>
+                    <span class="detail-value">
+                        <%= new Date(customer.createdOn).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        }) %>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Referral Code</span>
+                    <span class="detail-value"><%= customer.referalCode || 'None' %></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Wallet Balance</span>
+                    <span class="detail-value">₹<%= (customer.wallet && customer.wallet.length > 0) ? customer.wallet[0] : 0 %></span>
+                </div>
+            </div>
+
+            <div class="actions" style="margin-top: 2rem;">
+                <% if(customer.isBlocked){ %>
+                    <a href="/admin/unblockCustomer?id=<%= customer._id %>">
+                        <button class="btn block" style="padding: 10px 20px;">Unblock Customer</button>
+                    </a>
+                <% } else { %>
+                    <a href="/admin/blockCustomer?id=<%= customer._id %>">
+                        <button class="btn block" style="padding: 10px 20px;">Block Customer</button>
+                    </a>
+                <% } %>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>
