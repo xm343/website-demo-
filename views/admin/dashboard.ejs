@@ -41,12 +41,17 @@
 
             <div class="card">
                 <h3>Total Orders</h3>
-                <p><%= locals.totalOrders || 0 %></p>
+                <p><%= totalOrders %></p>
+            </div>
+
+            <div class="card">
+                <h3>Total Brands</h3>
+                <p><%= totalBrands %></p>
             </div>
 
             <div class="card revenue">
                 <h3>Total Revenue</h3>
-                <p>₹ <%= locals.totalRevenue || 0 %></p>
+                <p>₹ <%= totalRevenue %></p>
             </div>
 
         </div>
@@ -69,9 +74,9 @@
                     <% if (locals.orders && orders.length > 0) { %>
                         <% orders.forEach(order => { %>
                             <tr>
-                                <td><%= order._id %></td>
-                                <td><%= order.user %></td>
-                                <td>₹ <%= order.total %></td>
+                                <td><%= order._id.toString().slice(-8).toUpperCase() %></td>
+                                <td><%= order.address ? order.address.name : 'Unknown' %></td>
+                                <td>₹ <%= order.totalPrice %></td>
                                 <td><%= order.status %></td>
                             </tr>
                         <% }) %>

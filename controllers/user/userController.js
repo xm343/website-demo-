@@ -209,6 +209,101 @@ const logout = async (req, res) => {
     }
 }
 
+const getForgotPassword = async (req, res) => {
+    try {
+        res.render('forgot-password');
+    } catch (error) {
+        res.redirect('/pageNotFound');
+    }
+};
+
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const findUser = await User.findOne({ email: email });
+        if (findUser) {
+            const otp = generateOtp();
+            const emailSent = await sendVerificationEmail(email, otp);
+            if (emailSent) {
+                req.session.userOtp = otp;
+                req.session.forgotEmail = email;
+                res.render('forgot-password-otp');
+                console.log('Forgot Password OTP:', otp);
+            } else {
+                res.render('forgot-password', { message: 'Failed to send OTP. Please try again.' });
+            }
+        } else {
+            res.render('forgot-password', { message: 'User with this email does not exist' });
+        }
+    } catch (error) {
+        res.redirect('/pageNotFound');
+    }
+};
+
+const verifyForgotPasswordOtp = async (req, res) => {
+    try {
+        const { otp } = req.body;
+        if (otp === req.session.userOtp) {
+            res.json({ success: true, redirectUrl: '/reset-password' });
+        } else {
+            res.json({ success: false, message: 'Invalid OTP' });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'An error occurred' });
+    }
+};
+
+const getResetPassword = async (req, res) => {
+    try {
+        if (req.session.forgotEmail) {
+            res.render('reset-password');
+        } else {
+            res.redirect('/forgot-password');
+        }
+    } catch (error) {
+        res.redirect('/pageNotFound');
+    }
+};
+
+const resetPassword = async (req, res) => {
+    try {
+        const { password, confirmPassword } = req.body;
+        const email = req.session.forgotEmail;
+        if (password === confirmPassword) {
+            const passwordHash = await securePassword(password);
+            await User.updateOne({ email: email }, { $set: { password: passwordHash } });
+            req.session.forgotEmail = null;
+            req.session.userOtp = null;
+            res.json({ success: true, redirectUrl: '/login' });
+        } else {
+            res.json({ success: false, message: 'Passwords do not match' });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'An error occurred' });
+    }
+};
+
+const resendForgotOtp = async (req, res) => {
+    try {
+        const email = req.session.forgotEmail;
+        if (!email) {
+            return res.status(400).json({ success: false, message: 'Email not found in session' });
+        }
+        const otp = generateOtp();
+        req.session.userOtp = otp;
+        const emailSent = await sendVerificationEmail(email, otp);
+        if (emailSent) {
+            console.log('Resent Forgot Password OTP:', otp);
+            res.json({ success: true, message: 'OTP resent successfully' });
+        } else {
+            res.json({ success: false, message: 'Failed to resend OTP' });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'An error occurred' });
+    }
+};
+
 module.exports = {
-    loadHome,pageNotFound,signUp,signup,verifyOtp,resendOtp,loadLogin,login,logout
+    loadHome, pageNotFound, signUp, signup, verifyOtp, resendOtp, loadLogin, login, logout,
+    getForgotPassword, forgotPassword, verifyForgotPasswordOtp, getResetPassword, resetPassword, resendForgotOtp
 }

@@ -27,7 +27,11 @@ router.get('/login',userController.loadLogin)
 router.post('/login',userController.login)
 router.get('/logout',userController.logout)
 
+router.get('/forgot-password', userController.getForgotPassword);
+router.post('/forgot-password', userController.forgotPassword);
+router.post('/forgot-password-otp', userController.verifyForgotPasswordOtp);
+router.post('/resend-forgot-otp', userController.resendForgotOtp);
+router.get('/reset-password', userController.getResetPassword);
+router.post('/reset-password', userController.resetPassword);
 
-
-
-module.exports = router
+module.exports = router;

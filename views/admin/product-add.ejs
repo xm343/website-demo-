@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product - Admin</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- External CSS -->
+    <link rel="stylesheet" href="/css/admin-styles.css">
+    <!-- Cropper.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <style>
+        .image-cropper-container {
+            display: none;
+            position: relative;
+            max-width: 400px;
+            margin-top: 10px;
+        }
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .preview-container img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+        }
+        .form-section {
+            background: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .error-message {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+        .btn-submit {
+            background: #4f46e5;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-submit:hover {
+            background: #4338ca;
+        }
+        .thumbnail-card {
+            border: 1px solid #e5e7eb;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-layout">
+    <!-- Sidebar -->
+    <%- include('../partials/admin/sidebar') %>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <h1 style="margin-bottom: 32px;">Add New Product</h1>
+
+            <form action="/admin/addProducts" method="POST" enctype="multipart/form-data" id="productForm">
+                <div class="form-section">
+                    <div class="form-group">
+                        <label for="productName">Product Name</label>
+                        <input type="text" id="productName" name="productName" required>
+                        <div id="productName-error" class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" required></textarea>
+                        <div id="description-error" class="error-message"></div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div class="form-group">
+                            <label for="brand">Brand</label>
+                            <select id="brand" name="brand" required>
+                                <option value="">Select a brand</option>
+                                <% brand.forEach(b => { %>
+                                    <option value="<%= b.brandName %>"><%= b.brandName %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" name="category" required>
+                                <option value="">Select a category</option>
+                                <% cat.forEach(c => { %>
+                                    <option value="<%= c.name %>"><%= c.name %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px;">
+                        <div class="form-group">
+                            <label for="regularPrice">Regular Price (₹)</label>
+                            <input type="number" id="regularPrice" name="regularPrice" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="salePrice">Sale Price (₹)</label>
+                            <input type="number" id="salePrice" name="salePrice" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="quantity">Quantity</label>
+                            <input type="number" id="quantity" name="quantity" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="color">Color</label>
+                        <input type="text" id="color" name="color" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Product Images (Max 4)</h3>
+                    <p style="color: #6b7280; font-size: 14px; margin-bottom: 16px;">Please upload at least 3 images. You can crop them after selection.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <!-- Image 1 -->
+                        <div class="thumbnail-card">
+                            <label>Image 1</label>
+                            <input type="file" name="images" id="input1" accept="image/*" onchange="viewImage(event, 1)">
+                            <div id="cropperContainer1" class="image-cropper-container">
+                                <img src="" id="imgView1" alt="">
+                                <button type="button" id="saveButton1" class="btn-submit" style="margin-top: 10px; padding: 8px 16px;">Save Crop</button>
+                            </div>
+                        </div>
+
+                        <!-- Image 2 -->
+                        <div class="thumbnail-card">
+                            <label>Image 2</label>
+                            <input type="file" name="images" id="input2" accept="image/*" onchange="viewImage(event, 2)">
+                            <div id="cropperContainer2" class="image-cropper-container">
+                                <img src="" id="imgView2" alt="">
+                                <button type="button" id="saveButton2" class="btn-submit" style="margin-top: 10px; padding: 8px 16px;">Save Crop</button>
+                            </div>
+                        </div>
+
+                        <!-- Image 3 -->
+                        <div class="thumbnail-card">
+                            <label>Image 3</label>
+                            <input type="file" name="images" id="input3" accept="image/*" onchange="viewImage(event, 3)">
+                            <div id="cropperContainer3" class="image-cropper-container">
+                                <img src="" id="imgView3" alt="">
+                                <button type="button" id="saveButton3" class="btn-submit" style="margin-top: 10px; padding: 8px 16px;">Save Crop</button>
+                            </div>
+                        </div>
+
+                        <!-- Image 4 -->
+                        <div class="thumbnail-card">
+                            <label>Image 4</label>
+                            <input type="file" name="images" id="input4" accept="image/*" onchange="viewImage(event, 4)">
+                            <div id="cropperContainer4" class="image-cropper-container">
+                                <img src="" id="imgView4" alt="">
+                                <button type="button" id="saveButton4" class="btn-submit" style="margin-top: 10px; padding: 8px 16px;">Save Crop</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 32px; text-align: right;">
+                    <button type="submit" class="btn-submit" id="submitBtn">Publish Product</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script>
+    function viewImage(event, index) {
+        let input = event.target;
+        let reader = new FileReader();
+        reader.onload = function() {
+            let dataURL = reader.result;
+            let image = document.getElementById("imgView" + index);
+            image.src = dataURL;
+
+            // Initialize Cropper
+            let cropper = new Cropper(image, {
+                aspectRatio: 1,
+                viewMode: 1,
+                guides: true,
+                background: false,
+                autoCropArea: 1,
+                zoomable: true
+            });
+
+            let container = document.getElementById("cropperContainer" + index);
+            container.style.display = "block";
+
+            let saveButton = document.getElementById("saveButton" + index);
+            saveButton.addEventListener("click", async function() {
+                let croppedCanvas = cropper.getCroppedCanvas();
+                let imgView = document.getElementById("imgView" + index);
+                imgView.src = croppedCanvas.toDataURL("image/jpeg", 1.0);
+
+                let timestamp = new Date().getTime();
+                let fileName = `cropped-img-${timestamp}-${index}.png`;
+                
+                await croppedCanvas.toBlob(blob => {
+                    let input = document.getElementById("input" + index);
+                    let imgFile = new File([blob], fileName, { type: "image/png" });
+                    const fileList = new DataTransfer();
+                    fileList.items.add(imgFile);
+                    input.files = fileList.files;
+                });
+
+                cropper.destroy();
+                container.style.display = "none";
+            });
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+
+    // Basic form validation
+    document.getElementById('productForm').addEventListener('submit', function(e) {
+        let valid = true;
+        const productName = document.getElementById('productName').value;
+        const description = document.getElementById('description').value;
+        
+        if (productName.trim() === "") {
+            document.getElementById('productName-error').innerText = "Product Name is required";
+            document.getElementById('productName-error').style.display = "block";
+            valid = false;
+        } else {
+            document.getElementById('productName-error').style.display = "none";
+        }
+
+        if (description.trim() === "") {
+            document.getElementById('description-error').innerText = "Description is required";
+            document.getElementById('description-error').style.display = "block";
+            valid = false;
+        } else {
+            document.getElementById('description-error').style.display = "none";
+        }
+
+        // Add more validations as needed (price, quantity, images count)
+        
+        if (!valid) {
+            e.preventDefault();
+        }
+    });
+</script>
+
+</body>
+</html>

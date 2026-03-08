@@ -109,7 +109,7 @@
                         <textarea id="description" name="description" placeholder="Type here"></textarea>
                         <div id="description-error" class="error-message" style="color: red; display: none; font-size: 0.8rem; margin-top: 4px;"></div>
                     </div>
-                    <button type="submit" class="btn-full">Create Category</button>
+                    <button type="submit" class="btn-full">Add Category</button>
                     <% if (locals.error) { %>
                         <p style="color: red; font-size: 0.8rem; margin-top: 10px;"><%= error %></p>
                     <% } %>
@@ -148,7 +148,16 @@
                                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                         <%= item.description %>
                                     </td>
-                                    <td><%= item.categoryOffer %>%</td>
+                                    <td>
+                                        <% if (item.categoryOffer > 0) { %>
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <span><%= item.categoryOffer %>%</span>
+                                                <button class="btn" onclick="removeOffer('<%= item._id %>')" style="padding: 4px 8px; background-color: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+                                            </div>
+                                        <% } else { %>
+                                            <button class="btn" onclick="addOffer('<%= item._id %>')" style="padding: 6px 10px; background-color: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer;">Add Offer</button>
+                                        <% } %>
+                                    </td>
                                     <td>
                                         <% if(item.isListed) { %>
                                             <span class="status-active">Listed</span>
@@ -164,7 +173,7 @@
                                                 <a href="/admin/listCategory?id=<%= item._id %>" class="list-btn listed">List</a>
                                             <% } %>
                                             <a href="/admin/editCategory?id=<%= item._id %>">
-                                                <button class="btn" style="padding: 6px 10px; background-color: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
+                                                <button class="btn view">Edit</button>
                                             </a>
                                             <button class="btn" onclick="confirmDelete('<%= item._id %>')" style="padding: 6px 10px; background-color: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
                                         </div>
@@ -325,6 +334,91 @@
                 }
             } catch (error) {
                 Swal.fire('Error!', 'An error occurred while deleting the category', 'error');
+            }
+        }
+    }
+
+    async function addOffer(categoryId) {
+        const { value: amount } = await Swal.fire({
+            title: 'Add Category Offer',
+            input: 'number',
+            inputLabel: 'Offer Percentage (%)',
+            inputPlaceholder: 'Enter offer percentage',
+            inputAttributes: {
+                min: 1,
+                max: 100,
+                step: 1
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Add Offer',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You need to enter a percentage!';
+                }
+                if (value < 1 || value > 100) {
+                    return 'Percentage should be between 1 and 100!';
+                }
+            }
+        });
+
+        if (amount) {
+            try {
+                const response = await fetch('/admin/addCategoryOffer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        categoryId,
+                        percentage: amount
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    Swal.fire('Added!', data.message, 'success').then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Error!', data.error || 'Failed to add offer', 'error');
+                }
+            } catch (error) {
+                Swal.fire('Error!', 'An error occurred while adding the offer', 'error');
+            }
+        }
+    }
+
+    async function removeOffer(categoryId) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to remove the category offer?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, remove it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch('/admin/removeCategoryOffer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        categoryId
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    Swal.fire('Removed!', data.message, 'success').then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Error!', data.error || 'Failed to remove offer', 'error');
+                }
+            } catch (error) {
+                Swal.fire('Error!', 'An error occurred while removing the offer', 'error');
             }
         }
     }
