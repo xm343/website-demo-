@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banner Management</title>
+    <link rel="stylesheet" href="/css/admin-styles.css">
+</head>
+<body>
+
+<div class="admin-layout">
+    <%- include('../partials/admin/sidebar') %>
+
+    <main class="main-content">
+        <header class="content-header">
+            <h1>Banner Management</h1>
+            <a href="/admin/addBanner" class="btn btn-primary">Add New Banner</a>
+        </header>
+
+        <section class="container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (banners && banners.length > 0) { %>
+                        <% banners.forEach(banner => { %>
+                            <tr>
+                                <td><img src="/uploads/re-image/<%= banner.image %>" alt="<%= banner.title %>" style="width: 100px; height: auto;"></td>
+                                <td><%= banner.title %></td>
+                                <td><%= banner.description %></td>
+                                <td><%= new Date(banner.startDate).toLocaleDateString() %></td>
+                                <td><%= new Date(banner.endDate).toLocaleDateString() %></td>
+                                <td>
+                                    <a href="/admin/deleteBanner?id=<%= banner._id %>" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" style="text-align: center;">No banners found</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+
+</body>
+</html>

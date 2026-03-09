@@ -1,4 +1,7 @@
 const User = require('../../models/user/userSchema')
+const Category = require('../../models/user/categorySchema')
+const Product = require('../../models/user/productSchema') 
+const Banner = require('../../models/user/bannerSchema')
 const nodemailer = require('nodemailer')
 const bcrypt = require('bcrypt')
 const env = require('dotenv').config() 
@@ -81,22 +84,36 @@ const signUp = async(req,res)=>{
     }
 }
 
-const loadHome = async(req,res)=>{
+const loadHome = async (req, res) => {
     try {
-        const userId = req.session.user || (req.user ? req.user._id : null)
-        if(userId){
-            const userData = await User.findById(userId)
-            return res.render('home',{user:userData})
+        const userId = req.session.user || (req.user ? req.user._id : null);
+        const categories = await Category.find({ isListed: true });
+        const bannerData = await Banner.find({
+            startDate: { $lte: new Date() },
+            endDate: { $gte: new Date() }
+        });
+
+        let productData = await Product.find({
+            isBlocked: false,
+            category: { $in: categories.map(category => category._id) },
+            quantity: { $gt: 0 }
+        });
+
+        productData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        productData = productData.slice(0, 4);
+
+        if (userId) {
+            const userData = await User.findById(userId);
+            return res.render('home', { user: userData, products: productData, banners: bannerData });
+        } else {
+            return res.render('home', { products: productData, banners: bannerData });
         }
-        else{
-            return res.render('home')
-        }
-        
+
     } catch (error) {
-        console.log('home page not found',error.message)
-        res.status(500).send('server Error')
+        console.log('home page not found', error.message);
+        res.status(500).send('server Error');
     }
-}
+};
 const pageNotFound = async(req,res)=>{
     try {
         return res.render('page-404')

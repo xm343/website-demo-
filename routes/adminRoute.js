@@ -6,6 +6,7 @@ const customerController = require('../controllers/admin/customerController')
 const categoryController = require('../controllers/admin/categoryController')
 const brandController = require('../controllers/admin/brandController')
 const productController = require('../controllers/admin/productController')
+const bannerController = require('../controllers/admin/bannerController')
 const {userAuth,adminAuth} = require('../middlewares/auth')
 
 //multer
@@ -63,5 +64,11 @@ router.get('/editProduct',adminAuth,productController.getEditProduct)
 router.post('/editProduct/:id',adminAuth,uploads.array('images',4),productController.editProduct)
 router.post('/deleteImage',adminAuth,productController.deleteSingleImage)
 
+
+//Banner
+router.get('/banners', adminAuth, bannerController.getBannerPage);
+router.get('/addBanner', adminAuth, bannerController.getAddBannerPage);
+router.post('/addBanner', adminAuth, uploads.single('image'), bannerController.addBanner);
+router.get('/deleteBanner', adminAuth, bannerController.deleteBanner);
 
 module.exports = router;
