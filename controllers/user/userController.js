@@ -2,6 +2,7 @@ const User = require('../../models/user/userSchema')
 const Category = require('../../models/user/categorySchema')
 const Product = require('../../models/user/productSchema') 
 const Banner = require('../../models/user/bannerSchema')
+const Address = require('../../models/user/addressSchema')
 const nodemailer = require('nodemailer')
 const bcrypt = require('bcrypt')
 const env = require('dotenv').config() 
@@ -320,7 +321,111 @@ const resendForgotOtp = async (req, res) => {
     }
 };
 
+const userProfile = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const userData = await User.findById(userId);
+        const addressData = await Address.findOne({userId:userId})
+        res.render('userProfile', { user: userData, address:addressData});
+    } catch (error) {
+        console.error('Error loading user profile:', error);
+        res.redirect('/pageNotFound');
+    }
+};
+
+const addAddress = async(req,res)=>{
+    try {
+        const userId = req.session.user
+        res.render('add-address',{user:userId})
+    } catch (error) {
+        res.redirect('/pageerror')
+    }
+}
+
+const postAddAddress = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const userData = await User.findById(userId);
+        const { addressType, name, city, landMark, state, pincode, phone, altPhone } = req.body;
+
+        const userAddress = await Address.findOne({ userId: userData._id });
+        if (!userAddress) {
+            const newAddress = new Address({
+                userId: userData._id,
+                address: [{ addressType, name, city, landMark, state, pincode, phone, altPhone }]
+            });
+            await newAddress.save();
+        } else {
+            userAddress.address.push({ addressType, name, city, landMark, state, pincode, phone, altPhone });
+            await userAddress.save();
+        }
+
+        res.redirect('/userProfile');
+    } catch (error) {
+        console.error('Error adding address:', error);
+        res.redirect('/pageNotFound');
+    }
+};
+
+const getEditAddress = async (req, res) => {
+    try {
+        const addressId = req.query.id;
+        const userId = req.session.user;
+        const addressData = await Address.findOne({ userId: userId });
+        const address = addressData.address.find(item => item._id.toString() === addressId);
+        res.render('edit-address', { address: address, user: userId });
+    } catch (error) {
+        console.error('Error loading edit address page:', error);
+        res.redirect('/pageNotFound');
+    }
+};
+
+const postEditAddress = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const addressId = req.query.id;
+        const { addressType, name, city, landMark, state, pincode, phone, altPhone } = req.body;
+
+        await Address.updateOne(
+            { userId: userId, 'address._id': addressId },
+            {
+                $set: {
+                    'address.$.addressType': addressType,
+                    'address.$.name': name,
+                    'address.$.city': city,
+                    'address.$.landMark': landMark,
+                    'address.$.state': state,
+                    'address.$.pincode': pincode,
+                    'address.$.phone': phone,
+                    'address.$.altPhone': altPhone
+                }
+            }
+        );
+
+        res.redirect('/userProfile');
+    } catch (error) {
+        console.error('Error editing address:', error);
+        res.redirect('/pageNotFound');
+    }
+};
+
+const deleteAddress = async (req, res) => {
+    try {
+        const addressId = req.query.id;
+        const userId = req.session.user;
+        await Address.updateOne(
+            { userId: userId },
+            { $pull: { address: { _id: addressId } } }
+        );
+        res.redirect('/userProfile');
+    } catch (error) {
+        console.error('Error deleting address:', error);
+        res.redirect('/pageNotFound');
+    }
+};
+
 module.exports = {
     loadHome, pageNotFound, signUp, signup, verifyOtp, resendOtp, loadLogin, login, logout,
-    getForgotPassword, forgotPassword, verifyForgotPasswordOtp, getResetPassword, resetPassword, resendForgotOtp
+    getForgotPassword, forgotPassword, verifyForgotPasswordOtp, getResetPassword, resetPassword, resendForgotOtp,
+    userProfile,addAddress,postAddAddress,getEditAddress,postEditAddress,deleteAddress
 }

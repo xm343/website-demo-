@@ -3,6 +3,7 @@ const router = express.Router()
 const path = require('path')
 const userController = require('../controllers/user/userController')
 const passport = require('passport')
+const { userAuth, adminAuth } = require('../middlewares/auth')
 
 
 
@@ -33,5 +34,12 @@ router.post('/forgot-password-otp', userController.verifyForgotPasswordOtp);
 router.post('/resend-forgot-otp', userController.resendForgotOtp);
 router.get('/reset-password', userController.getResetPassword);
 router.post('/reset-password', userController.resetPassword);
+
+router.get('/userProfile', userAuth, userController.userProfile);
+router.get('/addAddress',userAuth,userController.addAddress)
+router.post('/addAddress',userAuth,userController.postAddAddress)
+router.get('/editAddress',userAuth,userController.getEditAddress)
+router.post('/editAddress',userAuth,userController.postEditAddress)
+router.get('/deleteAddress',userAuth,userController.deleteAddress)
 
 module.exports = router;
