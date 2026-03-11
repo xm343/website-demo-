@@ -424,8 +424,17 @@ const deleteAddress = async (req, res) => {
     }
 };
 
+
+const getShoppingPage = async(req,res)=>{
+    try {
+        res.render('shop')
+    } catch (error) {
+        res.redirect('/pageNotFound')
+    }
+}
+
 module.exports = {
     loadHome, pageNotFound, signUp, signup, verifyOtp, resendOtp, loadLogin, login, logout,
     getForgotPassword, forgotPassword, verifyForgotPasswordOtp, getResetPassword, resetPassword, resendForgotOtp,
-    userProfile,addAddress,postAddAddress,getEditAddress,postEditAddress,deleteAddress
+    userProfile,addAddress,postAddAddress,getEditAddress,postEditAddress,deleteAddress,getShoppingPage
 }

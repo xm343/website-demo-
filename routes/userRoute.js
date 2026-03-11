@@ -42,4 +42,10 @@ router.get('/editAddress',userAuth,userController.getEditAddress)
 router.post('/editAddress',userAuth,userController.postEditAddress)
 router.get('/deleteAddress',userAuth,userController.deleteAddress)
 
+
+//shop
+
+router.get('/shop',userAuth,userController.getShoppingPage)
+
+
 module.exports = router;
