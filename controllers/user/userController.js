@@ -1,6 +1,7 @@
 const User = require('../../models/user/userSchema')
 const Category = require('../../models/user/categorySchema')
-const Product = require('../../models/user/productSchema') 
+const Product = require('../../models/user/productSchema')
+const Brand  = require('../../models/user/brandSchema') 
 const Banner = require('../../models/user/bannerSchema')
 const Address = require('../../models/user/addressSchema')
 const nodemailer = require('nodemailer')
@@ -425,11 +426,76 @@ const deleteAddress = async (req, res) => {
 };
 
 
-const getShoppingPage = async(req,res)=>{
+const getShoppingPage = async (req, res) => {
     try {
-        res.render('shop')
+        const userId = req.session.user;
+        const userData = userId ? await User.findById(userId) : null;
+
+        const categories = await Category.find({ isListed: true });
+        const brands = await Brand.find({ isBlocked: false });
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = 9;
+        const skip = (page - 1) * limit;
+
+        const query = {
+            isBlocked: false,
+            quantity: { $gt: 0 },
+            category: { $in: categories.map(cat => cat._id) }
+        };
+
+        if (req.query.category) {
+            query.category = req.query.category;
+        }
+
+        if (req.query.brand) {
+            query.brand = req.query.brand;
+        }
+
+        if (req.query.search) {
+            query.productName = { $regex: req.query.search, $options: 'i' };
+        }
+
+        if (req.query.minPrice || req.query.maxPrice) {
+            query.salesPrice = {};
+            if (req.query.minPrice) query.salesPrice.$gte = parseFloat(req.query.minPrice);
+            if (req.query.maxPrice) query.salesPrice.$lte = parseFloat(req.query.maxPrice);
+        }
+
+        let sortOption = { createdAt: -1 }; 
+        const sort = req.query.sort;
+        if (sort === 'lowToHigh') sortOption = { salesPrice: 1 };
+        else if (sort === 'highToLow') sortOption = { salesPrice: -1 };
+        else if (sort === 'aToZ') sortOption = { productName: 1 };
+        else if (sort === 'zToA') sortOption = { productName: -1 };
+
+        const products = await Product.find(query)
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limit);
+
+        const totalProducts = await Product.countDocuments(query);
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        res.render('shop', {
+            user: userData,
+            products: products,
+            categories: categories,
+            brands: brands,
+            totalPages: totalPages,
+            currentPage: page,
+            totalProducts: totalProducts,
+            search: req.query.search || '',
+            sort: req.query.sort || '',
+            selectedCategory: req.query.category || '',
+            selectedBrand: req.query.brand || '',
+            minPrice: req.query.minPrice || '',
+            maxPrice: req.query.maxPrice || ''
+        });
+
     } catch (error) {
-        res.redirect('/pageNotFound')
+        console.error('getShoppingPage error:', error);
+        res.redirect('/pageNotFound');
     }
 }
 

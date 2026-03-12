@@ -23,7 +23,12 @@
                 <div class="shop__sidebar">
                     <div class="shop__sidebar__search">
                         <form action="/shop" method="GET">
-                            <input type="text" name="search" placeholder="Search..." value="<%= locals.search || '' %>">
+                            <input type="text" name="search" placeholder="Search..." value="<%= search %>">
+                            <% if (selectedCategory) { %><input type="hidden" name="category" value="<%= selectedCategory %>"><% } %>
+                            <% if (selectedBrand) { %><input type="hidden" name="brand" value="<%= selectedBrand %>"><% } %>
+                            <% if (sort) { %><input type="hidden" name="sort" value="<%= sort %>"><% } %>
+                            <% if (minPrice) { %><input type="hidden" name="minPrice" value="<%= minPrice %>"><% } %>
+                            <% if (maxPrice) { %><input type="hidden" name="maxPrice" value="<%= maxPrice %>"><% } %>
                             <button type="submit"><span class="icon_search"></span></button>
                         </form>
                     </div>
@@ -37,8 +42,9 @@
                                     <div class="card-body">
                                         <div class="shop__sidebar__categories">
                                             <ul class="nice-scroll">
+                                                <li><a href="/shop?<%= new URLSearchParams({brand: selectedBrand, search: search, sort: sort, minPrice: minPrice, maxPrice: maxPrice}).toString() %>" class="<%= !selectedCategory ? 'text-primary' : '' %>">All Categories</a></li>
                                                 <% categories.forEach(category => { %>
-                                                    <li><a href="/shop?category=<%= category._id %>"><%= category.name %></a></li>
+                                                    <li><a href="/shop?category=<%= category._id %>&<%= new URLSearchParams({brand: selectedBrand, search: search, sort: sort, minPrice: minPrice, maxPrice: maxPrice}).toString() %>" class="<%= selectedCategory == category._id.toString() ? 'text-primary' : '' %>"><%= category.name %></a></li>
                                                 <% }) %>
                                             </ul>
                                         </div>
@@ -53,8 +59,9 @@
                                     <div class="card-body">
                                         <div class="shop__sidebar__brand">
                                             <ul>
+                                                <li><a href="/shop?<%= new URLSearchParams({category: selectedCategory, search: search, sort: sort, minPrice: minPrice, maxPrice: maxPrice}).toString() %>" class="<%= !selectedBrand ? 'text-primary' : '' %>">All Brands</a></li>
                                                 <% brands.forEach(brand => { %>
-                                                    <li><a href="/shop?brand=<%= brand.brandName %>"><%= brand.brandName %></a></li>
+                                                    <li><a href="/shop?brand=<%= brand.brandName %>&<%= new URLSearchParams({category: selectedCategory, search: search, sort: sort, minPrice: minPrice, maxPrice: maxPrice}).toString() %>" class="<%= selectedBrand == brand.brandName ? 'text-primary' : '' %>"><%= brand.brandName %></a></li>
                                                 <% }) %>
                                             </ul>
                                         </div>
@@ -69,17 +76,21 @@
                                     <div class="card-body">
                                         <div class="shop__sidebar__price">
                                             <ul>
-                                                <li><a href="/shop?minPrice=0&maxPrice=500">₹0 - ₹500</a></li>
-                                                <li><a href="/shop?minPrice=500&maxPrice=1000">₹500 - ₹1000</a></li>
-                                                <li><a href="/shop?minPrice=1000&maxPrice=1500">₹1000 - ₹1500</a></li>
-                                                <li><a href="/shop?minPrice=1500&maxPrice=2000">₹1500 - ₹2000</a></li>
-                                                <li><a href="/shop?minPrice=2000&maxPrice=2500">₹2000 - ₹2500</a></li>
-                                                <li><a href="/shop?minPrice=2500">₹2500+</a></li>
+                                                <li><a href="/shop?minPrice=0&maxPrice=500&<%= new URLSearchParams({category: selectedCategory, brand: selectedBrand, search: search, sort: sort}).toString() %>">₹0 - ₹500</a></li>
+                                                <li><a href="/shop?minPrice=500&maxPrice=1000&<%= new URLSearchParams({category: selectedCategory, brand: selectedBrand, search: search, sort: sort}).toString() %>">₹500 - ₹1000</a></li>
+                                                <li><a href="/shop?minPrice=1000&maxPrice=1500&<%= new URLSearchParams({category: selectedCategory, brand: selectedBrand, search: search, sort: sort}).toString() %>">₹1000 - ₹1500</a></li>
+                                                <li><a href="/shop?minPrice=1500&maxPrice=2000&<%= new URLSearchParams({category: selectedCategory, brand: selectedBrand, search: search, sort: sort}).toString() %>">₹1500 - ₹2000</a></li>
+                                                <li><a href="/shop?minPrice=2000&maxPrice=2500&<%= new URLSearchParams({category: selectedCategory, brand: selectedBrand, search: search, sort: sort}).toString() %>">₹2000 - ₹2500</a></li>
+                                                <li><a href="/shop?minPrice=2500&<%= new URLSearchParams({category: selectedCategory, brand: selectedBrand, search: search, sort: sort}).toString() %>">₹2500+</a></li>
+                                                <li><a href="/shop?<%= new URLSearchParams({category: selectedCategory, brand: selectedBrand, search: search, sort: sort}).toString() %>">Clear Price Filter</a></li>
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="mt-3">
+                            <a href="/shop" class="btn btn-secondary btn-sm btn-block">Clear All Filters</a>
                         </div>
                     </div>
                 </div>
@@ -89,29 +100,40 @@
                     <div class="row">
                         <div class="col-lg-6 col-md-6 col-sm-6">
                             <div class="shop__product__option__left">
-                                <p>Showing <%= products.length %> results</p>
+                                <p>Showing <%= products.length %> of <%= totalProducts %> results</p>
                             </div>
                         </div>
                         <div class="col-lg-6 col-md-6 col-sm-6">
                             <div class="shop__product__option__right">
-                                <p>Sort by Price:</p>
+                                <p>Sort by:</p>
                                 <select onchange="location = this.value;">
-                                    <option value="/shop?sort=lowToHigh" <%= locals.sort === 'lowToHigh' ? 'selected' : '' %>>Low To High</option>
-                                    <option value="/shop?sort=highToLow" <%= locals.sort === 'highToLow' ? 'selected' : '' %>>High To Low</option>
+                                    <option value="/shop?sort=newArrivals&<%= new URLSearchParams({category: selectedCategory, brand: selectedBrand, search: search, minPrice: minPrice, maxPrice: maxPrice}).toString() %>" <%= sort === 'newArrivals' ? 'selected' : '' %>>New Arrivals</option>
+                                    <option value="/shop?sort=lowToHigh&<%= new URLSearchParams({category: selectedCategory, brand: selectedBrand, search: search, minPrice: minPrice, maxPrice: maxPrice}).toString() %>" <%= sort === 'lowToHigh' ? 'selected' : '' %>>Price: Low to High</option>
+                                    <option value="/shop?sort=highToLow&<%= new URLSearchParams({category: selectedCategory, brand: selectedBrand, search: search, minPrice: minPrice, maxPrice: maxPrice}).toString() %>" <%= sort === 'highToLow' ? 'selected' : '' %>>Price: High to Low</option>
+                                    <option value="/shop?sort=aToZ&<%= new URLSearchParams({category: selectedCategory, brand: selectedBrand, search: search, minPrice: minPrice, maxPrice: maxPrice}).toString() %>" <%= sort === 'aToZ' ? 'selected' : '' %>>Name: A - Z</option>
+                                    <option value="/shop?sort=zToA&<%= new URLSearchParams({category: selectedCategory, brand: selectedBrand, search: search, minPrice: minPrice, maxPrice: maxPrice}).toString() %>" <%= sort === 'zToA' ? 'selected' : '' %>>Name: Z - A</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="row">
+                    <% if (products.length === 0) { %>
+                        <div class="col-lg-12">
+                            <div class="text-center py-5">
+                                <h3>No products found matching your criteria.</h3>
+                                <a href="/shop" class="btn btn-primary mt-3">View All Products</a>
+                            </div>
+                        </div>
+                    <% } %>
                     <% products.forEach(product => { %>
                         <div class="col-lg-4 col-md-6 col-sm-6">
                             <div class="product__item">
                                 <div class="product__item__pic set-bg" data-setbg="/uploads/re-image/<%= product.productImage[0] %>">
                                     <ul class="product__hover">
-                                        <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
-                                        <li><a href="#"><img src="img/icon/compare.png" alt=""> <span>Compare</span></a></li>
-                                        <li><a href="#"><img src="img/icon/search.png" alt=""></a></li>
+                                        <li><a href="#"><img src="/img/icon/heart.png" alt=""></a></li>
+                                        <li><a href="#"><img src="/img/icon/compare.png" alt=""> <span>Compare</span></a></li>
+                                        <li><a href="#"><img src="/img/icon/search.png" alt=""></a></li>
                                     </ul>
                                 </div>
                                 <div class="product__item__text">
@@ -134,7 +156,7 @@
                     <div class="col-lg-12">
                         <div class="product__pagination">
                             <% for(let i = 1; i <= totalPages; i++) { %>
-                                <a class="<%= i === currentPage ? 'active' : '' %>" href="/shop?page=<%= i %>"><%= i %></a>
+                                <a class="<%= i === currentPage ? 'active' : '' %>" href="/shop?page=<%= i %>&<%= new URLSearchParams({category: selectedCategory, brand: selectedBrand, search: search, sort: sort, minPrice: minPrice, maxPrice: maxPrice}).toString() %>"><%= i %></a>
                             <% } %>
                         </div>
                     </div>
